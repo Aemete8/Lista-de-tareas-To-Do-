@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO básico -->
+    <title>Lista de tareas — Organiza tu día</title>
+    <meta name="description"
+        content="Aplicación para gestionar tus tareas diarias. Agrega, completa y elimina tareas de forma rápida." />
+    <meta name="robots" content="noindex, nofollow" /> <!-- app personal, no indexar -->
+
+    <!-- Open Graph (por si lo compartes) -->
+    <meta property="og:title" content="Lista de tareas" />
+    <meta property="og:description" content="Organiza tus tareas del día." />
+    <meta property="og:type" content="website" />
+
+    <!-- Fuentes (Inter 400-500-600) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body>
+
+    <header class="header" role="banner">
+        <div class="header__container">
+            <h1 class="header__title">Mis tareas</h1>
+            <p class="header__subtitle">
+                <!-- JS va a actualizar este texto dinámicamente -->
+                <span id="pending-count" aria-live="polite" aria-atomic="true">0 tareas pendientes</span>
+            </p>
+        </div>
+    </header>
+
+    <main id="main-content" class="main">
+
+        <!-- FORMULARIO DE NUEVA TAREA -->
+        <section class="task-form" aria-labelledby="form-title">
+            <!-- sr-only: visible solo para lectores de pantalla, no ocupa espacio visual -->
+            <h2 id="form-title" class="sr-only">Agregar nueva tarea</h2>
+
+            <div class="task-form__group">
+                <label class="task-form__label" for="task-input">
+                    Nueva tarea
+                </label>
+                <div class="task-form__row">
+                    <input class="task-form__input" type="text" id="task-input" name="task"
+                        placeholder="Ej: Estudiar funciones en JS" maxlength="150" autocomplete="off"
+                        aria-required="true" aria-describedby="task-input-hint" />
+                    <button class="task-form__button" type="button" id="add-btn" aria-label="Agregar tarea">
+                        Agregar
+                    </button>
+                </div>
+                <p class="task-form__hint" id="task-input-hint">
+                    Presiona Enter o el botón para agregar.
+                </p>
+            </div>
+        </section>
+
+        <!-- CONTROLES DE FILTRO (extra / opcional) -->
+        <section class="task-filters" aria-label="Filtrar tareas">
+            <div class="task-filters__group" role="group" aria-labelledby="filter-label">
+                <span class="task-filters__label" id="filter-label">Mostrar:</span>
+
+                <button class="task-filters__btn task-filters__btn--active" data-filter="all" aria-pressed="true">
+                    Todas
+                </button>
+                <button class="task-filters__btn" data-filter="pending" aria-pressed="false">
+                    Pendientes
+                </button>
+                <button class="task-filters__btn" data-filter="completed" aria-pressed="false">
+                    Completadas
+                </button>
+            </div>
+
+            <button class="task-filters__clear" id="clear-completed-btn" type="button"
+                aria-label="Eliminar todas las tareas completadas">
+                Limpiar completadas
+            </button>
+        </section>
+
+        <!-- LISTA DE TAREAS -->
+        <section class="task-list-section" aria-labelledby="list-title">
+            <h2 id="list-title" class="sr-only">Lista de tareas</h2>
+
+            <!-- aria-live: anuncia cambios a lectores de pantalla automáticamente -->
+            <ul class="task-list" id="task-list" role="list" aria-live="polite" aria-label="Tus tareas">
+                <!-- JS genera cada <li> con esta estructura BEM:
+                
+                <li class="task-item" data-index="0">
+                    <button class="task-item__toggle" aria-pressed="false" aria-label="Marcar como completada: Estudiar JS">
+                        <span class="task-item__checkbox" aria-hidden="true"></span>
+                        <span class="task-item__text">Estudiar JS</span>
+                    </button>
+                    <button class="task-item__delete" type="button" aria-label="Eliminar tarea: Estudiar JS">
+                        ✕
+                    </button>
+                </li>
+                
+                Modificadores BEM que JS agrega:
+                task-item--completed → tarea tachada
+                task-item--entering → animación de entrada -->
+            </ul>
+
+            <!-- Estado vacío — JS lo muestra/oculta -->
+            <div class="task-empty" id="task-empty" hidden>
+                <p class="task-empty__message">No hay tareas todavía.</p>
+                <p class="task-empty__hint">Agrega una arriba para empezar.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script defer src="./js/app.js"></script>
+
+</body>
+
+</html>
