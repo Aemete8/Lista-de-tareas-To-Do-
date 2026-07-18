@@ -5,7 +5,7 @@ Una aplicación sencilla de lista de tareas construida con HTML, CSS y JavaScrip
 ## 🚀 Cómo usar
 
 1. Clona el repositorio:
-   git clone https://github.com/tuusuario/todo-app.git
+   git clone [To-Do App](https://github.com/Aemete8/Lista-de-tareas-To-Do-)
 
 2. Abre index.html en tu navegador.
 
