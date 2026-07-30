@@ -5,16 +5,20 @@ const botonTareasPendientes = document.querySelector('#button-pending_tasks')
 const botonTareasCompletadas = document.querySelector('#button-complete_tasks')
 const botonLimpiarTareas = document.querySelector('#clear-completed-btn')
 
+const listaBotonesFiltro = [botonTareasCompletadas,botonTareasPendientes,botonTodasTareas]
+
 const contenedorDeTareas = document.querySelector('#task-list')
 const inputTextoTarea = document.querySelector('#task-input')
 let tareas = []
 let filtroActivo = 'all'
 
+const STORAGE_KEY = 'tareas'
+
 botonAgregarTarea.addEventListener('click', manejarAgregarTarea)
 
-botonTodasTareas.addEventListener('click', mostrarTodasTareas)
-botonTareasPendientes.addEventListener('click', mostrarTareasPendientes)
-botonTareasCompletadas.addEventListener('click', mostrarTareasCompletadas)
+botonTodasTareas.addEventListener('click', () => cambiarFiltro('all', botonTodasTareas))
+botonTareasPendientes.addEventListener('click', () => cambiarFiltro('pending', botonTareasPendientes))
+botonTareasCompletadas.addEventListener('click', () => cambiarFiltro('completed', botonTareasCompletadas))
 botonLimpiarTareas.addEventListener('click', limpiarCompletadas)
 
 
@@ -44,26 +48,38 @@ function vaciarValor(elemento) {
 function renderizarTareas() {
     contenedorDeTareas.innerHTML = ''
     let tareaFormato = ''
-    let tareasAMostrar = [...tareas]
-
-    if (filtroActivo === 'pending') { tareasAMostrar = tareasAMostrar.filter(tarea => tarea.completada === false) }
-    if (filtroActivo === 'completed') { tareasAMostrar = tareasAMostrar.filter(tarea => tarea.completada === true)}
+    let tareasAMostrar = filtrarTareas(tareas, filtroActivo)
 
     for (let i = 0; i < tareasAMostrar.length; i++) {
         tareaFormato += `
                 <li class="task-item ${tareasAMostrar[i].completada ? 'task-item--completed' : '' }" data-index="${tareas.indexOf(tareasAMostrar[i])}">
-                    <button class="task-item__toggle" aria-pressed="false" aria-label="Marcar como completada: ${tareasAMostrar[i].texto}">
+                    <button class="task-item__toggle" aria-pressed="${tareasAMostrar[i].completada}" aria-label="Marcar como completada: ${tareasAMostrar[i].texto}">
                         <span class="task-item__checkbox" aria-hidden="true"></span>
                         <span class="task-item__text">${tareasAMostrar[i].texto}</span>
                     </button>
                     <button class="task-item__delete" type="button" aria-label="Eliminar tarea: ${tareasAMostrar[i].texto}">
                         ✕
                     </button>
-                </li>`
+                </li>
+                `
     }
     contenedorDeTareas.innerHTML = tareaFormato
     actualizarEstadoVacio(tareasAMostrar)
     actualizarContadorPendientes()
+    actualizarProgreso()
+    guardarTareasLocalStorage()
+}
+
+function filtrarTareas(arreglo, filtro) {
+    if (filtro === 'all') { 
+        return arreglo
+    }
+    if (filtro === 'pending') { 
+        return arreglo.filter(tarea => tarea.completada === false) 
+    }
+    if (filtro === 'completed') { 
+        return arreglo.filter(tarea => tarea.completada === true)
+    }
 }
 
 function actualizarEstadoVacio(lista) {
@@ -96,34 +112,54 @@ function completarTarea(boton) {
     renderizarTareas()
 }
 
+function actualizarProgreso() {
+    const barraProgreso = document.querySelector('.header__progress-bar')
+    const tareasCompletadas =  tareas.filter((tarea) => tarea.completada)
+
+    if (tareas.length === 0) {
+        barraProgreso.style.width = '0%'
+        return
+    }
+
+    let porcentajeProgreso = (tareasCompletadas.length / tareas.length) * 100
+    console.log(porcentajeProgreso);
+    barraProgreso.style.width = `${porcentajeProgreso}%` 
+}
+
 function actualizarContadorPendientes() {
     const contador = document.querySelector('#pending-count')
     contador.textContent = `${tareas.filter(tarea => !tarea.completada).length} tareas pendientes`
 }
 
-function mostrarTodasTareas() {
-    filtroActivo = 'all'
-    botonTodasTareas.classList.add('task-filters__btn--active')
-    botonTareasPendientes.classList.remove('task-filters__btn--active')
-    botonTareasCompletadas.classList.remove('task-filters__btn--active')
+function cambiarFiltro(filtro, boton) {
+    filtroActivo = filtro
+    actualizarBotones(boton)
     renderizarTareas()
 }
-function mostrarTareasPendientes() {
-    filtroActivo = 'pending'
-    botonTareasPendientes.classList.add('task-filters__btn--active')
-    botonTareasCompletadas.classList.remove('task-filters__btn--active')
-    botonTodasTareas.classList.remove('task-filters__btn--active')
-    renderizarTareas()
-}
-function mostrarTareasCompletadas() {
-    filtroActivo = 'completed'
-    botonTareasCompletadas.classList.add('task-filters__btn--active')
-    botonTareasPendientes.classList.remove('task-filters__btn--active')
-    botonTodasTareas.classList.remove('task-filters__btn--active')
-    renderizarTareas()
+
+function actualizarBotones(botonActivo) {
+    for (let i = 0; i < listaBotonesFiltro.length; i++) {
+        listaBotonesFiltro[i].classList.remove('task-filters__btn--active')
+        listaBotonesFiltro[i].setAttribute('aria-pressed', 'false')
+    }
+    botonActivo.classList.add('task-filters__btn--active')
+    botonActivo.setAttribute('aria-pressed', 'true')
 }
 
 function limpiarCompletadas() {
     tareas = tareas.filter(tarea => tarea.completada === false)
     renderizarTareas()
 }
+
+function guardarTareasLocalStorage() {
+    const datoToString = JSON.stringify(tareas)
+    localStorage.setItem(STORAGE_KEY, datoToString)
+}
+
+function cargarTareasLocalStorage() {
+    const datosCrudos = localStorage.getItem(STORAGE_KEY)
+    tareas = datosCrudos ? JSON.parse(datosCrudos) : []
+    renderizarTareas()
+}
+
+cargarTareasLocalStorage()
