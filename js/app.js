@@ -121,8 +121,7 @@ function actualizarProgreso() {
         return
     }
 
-    let porcentajeProgreso = (tareasCompletadas.length / tareas.length) * 100
-    console.log(porcentajeProgreso);
+    const porcentajeProgreso = (tareasCompletadas.length / tareas.length) * 100
     barraProgreso.style.width = `${porcentajeProgreso}%` 
 }
 
